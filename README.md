@@ -7,9 +7,18 @@ as a high-quality, multi-page PDF.
 Everything runs locally: no backend, no database, no login, no internet connection required
 after the initial files are on disk.
 
+**Live demo:** <https://johnmerston.github.io/Image-Layout-Studio/>
+
 ---
 
 ## Setup
+
+### Use the hosted app (any device)
+
+The site is published with GitHub Pages at
+<https://johnmerston.github.io/Image-Layout-Studio/> — open it on any device with a modern
+browser. Your work is autosaved in that browser's own storage (IndexedDB / localStorage) and
+can be moved between devices with **Save JSON** / **Import JSON**.
 
 ### Quick start (recommended)
 
@@ -199,3 +208,10 @@ The build followed the six phases from the specification (interface → image in
 transformations → pages → print/PDF → productivity), with each phase tested before the next:
 grid geometry, multi-upload and auto-pagination, transforms and cropping, page management,
 preview↔print↔PDF parity, and undo/autosave/import/export.
+
+### Deployment
+
+The site is served by GitHub Pages from the `main` branch (root) — there is no build step.
+To publish changes: `git add -A && git commit && git push`, then Pages rebuilds automatically
+(typically within a minute; check the *Actions* tab or
+<https://github.com/Johnmerston/Image-Layout-Studio> for the live badge).
