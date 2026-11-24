@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Image Layout &amp; PDF Studio</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ TOP TOOLBAR ============ -->
+  <header id="toolbar">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+        <rect x="2.5" y="3.5" width="19" height="17" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <rect x="5.5" y="6.5" width="5.5" height="5" rx="1" fill="currentColor" opacity=".85"/>
+        <rect x="13" y="6.5" width="5.5" height="5" rx="1" fill="currentColor" opacity=".45"/>
+        <rect x="5.5" y="13.5" width="5.5" height="4" rx="1" fill="currentColor" opacity=".45"/>
+        <rect x="13" y="13.5" width="5.5" height="4" rx="1" fill="currentColor" opacity=".85"/>
+      </svg>
+      <span>Image Layout <b>&amp;</b> PDF Studio</span>
+    </div>
+
+    <div class="tgroup">
+      <button id="btnAddImages" class="btn" title="Add images (Ctrl+O)"><span class="ic">＋</span> Add images</button>
+      <button id="btnUndo" class="btn icon" title="Undo (Ctrl+Z)" disabled>↶</button>
+      <button id="btnRedo" class="btn icon" title="Redo (Ctrl+Y)" disabled>↷</button>
+      <span class="sep"></span>
+      <button id="btnClearAll" class="btn" title="Remove every image">Clear images</button>
+      <button id="btnResetDoc" class="btn" title="Reset document to defaults">Reset</button>
+    </div>
+
+    <div class="tgroup grow center">
+      <button id="btnZoomOut" class="btn icon" title="Zoom out (Ctrl + −)">−</button>
+      <input type="range" id="zoomRange" min="20" max="300" value="100" title="Preview zoom">
+      <span id="zoomValue" class="mono" title="Zoom level">100%</span>
+      <button id="btnZoomIn" class="btn icon" title="Zoom in (Ctrl + +)">＋</button>
+      <button id="btnZoomFit" class="btn" title="Fit page to workspace (Ctrl+0)">Fit</button>
+    </div>
+
+    <div class="tgroup right">
+      <button id="btnSaveProject" class="btn" title="Export project as JSON (Ctrl+S)">Save JSON</button>
+      <button id="btnLoadProject" class="btn" title="Import project JSON">Import</button>
+      <span class="sep"></span>
+      <button id="btnPrint" class="btn" title="Print / Save as PDF (Ctrl+P)">Print</button>
+      <button id="btnExportPdf" class="btn primary" title="Export a multi-page PDF">Export PDF</button>
+      <button id="btnFullscreen" class="btn icon" title="Full-screen workspace (F11)">⛶</button>
+    </div>
+  </header>
+
+  <!-- ============ WORKSPACE ============ -->
+  <main id="workspace">
+
+    <!-- ---- LEFT: document settings ---- -->
+    <aside id="leftPanel" class="panel">
+      <div class="panel-head">Document Settings</div>
+      <div class="panel-scroll">
+
+        <section class="group">
+          <h3>Page</h3>
+          <div class="field">
+            <label for="pageSize">Page size</label>
+            <select id="pageSize">
+              <option value="A4">A4</option>
+              <option value="A3">A3</option>
+              <option value="A5">A5</option>
+              <option value="Letter">Letter</option>
+              <option value="Legal">Legal</option>
+              <option value="Custom">Custom</option>
+            </select>
+          </div>
+          <div class="field two" id="customSizeRow" hidden>
+            <label>Custom size (mm)
+              <span class="inline">
+                <input type="number" id="customW" min="20" max="2000" step="1" title="Custom width">
+                <span class="x">×</span>
+                <input type="number" id="customH" min="20" max="2000" step="1" title="Custom height">
+              </span>
+            </label>
+          </div>
+          <div class="field">
+            <label>Orientation</label>
+            <div class="seg" id="orientation">
+              <button type="button" data-value="portrait" class="on">Portrait</button>
+              <button type="button" data-value="landscape">Landscape</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="pageBg">Page background</label>
+            <span class="colorwrap">
+              <input type="color" id="pageBg" value="#ffffff">
+              <input type="text" id="pageBgHex" class="narrow mono" value="#ffffff" maxlength="7" spellcheck="false">
+            </span>
+          </div>
+          <div class="field">
+            <label>Margins (mm)</label>
+            <div class="quad">
+              <label class="mini">Top<input type="number" id="mTop" min="0" max="200" step="0.5"></label>
+              <label class="mini">Right<input type="number" id="mRight" min="0" max="200" step="0.5"></label>
+              <label class="mini">Bottom<input type="number" id="mBottom" min="0" max="200" step="0.5"></label>
+              <label class="mini">Left<input type="number" id="mLeft" min="0" max="200" step="0.5"></label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="slotGap">Spacing between slots (mm)</label>
+            <input type="number" id="slotGap" min="0" max="50" step="0.5">
+          </div>
+        </section>
+
+        <section class="group">
+          <h3>Grid <span class="hint">applies to current page</span></h3>
+          <div class="stepper">
+            <span class="lab">Rows</span>
+            <button type="button" class="btn icon sm" data-step="rows:-1" title="Remove row">−</button>
+            <input type="number" id="gridRows" min="1" max="50" step="1">
+            <button type="button" class="btn icon sm" data-step="rows:1" title="Add row">＋</button>
+          </div>
+          <div class="stepper">
+            <span class="lab">Columns</span>
+            <button type="button" class="btn icon sm" data-step="cols:-1" title="Remove column">−</button>
+            <input type="number" id="gridCols" min="1" max="50" step="1">
+            <button type="button" class="btn icon sm" data-step="cols:1" title="Add column">＋</button>
+          </div>
+          <div class="stepper">
+            <span class="lab">Total slots</span>
+            <input type="number" id="gridTotal" min="1" max="2500" step="1" title="Specify the total number of slots directly (fills columns left-to-right)">
+            <span class="calc" id="gridCalc">6 slots</span>
+          </div>
+          <div class="btnrow">
+            <button type="button" id="btnGridAll" class="btn block" title="Copy this page's grid to every page">Apply grid to all pages</button>
+          </div>
+        </section>
+
+        <section class="group">
+          <h3>Pages</h3>
+          <div class="pageline">
+            <span id="pageInfo">Page 1 of 1</span>
+            <span class="hint" id="pageSlotsInfo">6 slots</span>
+          </div>
+          <div class="btnrow">
+            <button type="button" id="btnAddPage" class="btn grow" title="Add an empty page">＋ Page</button>
+            <button type="button" id="btnDupPage" class="btn grow" title="Duplicate current page">Duplicate</button>
+            <button type="button" id="btnDelPage" class="btn grow danger" title="Delete current page">Delete</button>
+          </div>
+          <p class="note">Pages are created automatically when images exceed the available slots. Drag images or use the page strip below the preview to rearrange.</p>
+        </section>
+
+      </div>
+    </aside>
+
+    <!-- ---- CENTER: live preview ---- -->
+    <section id="centerPanel">
+      <div id="previewScroll">
+        <div id="previewStage"></div>
+      </div>
+      <footer id="pageStrip">
+        <div class="strip-tools">
+          <button id="stripPrev" class="btn icon sm" title="Previous page (Page Up)">‹</button>
+          <button id="stripNext" class="btn icon sm" title="Next page (Page Down)">›</button>
+          <button id="stripAdd" class="btn icon sm" title="Add page">＋</button>
+        </div>
+        <div id="stripPages" class="strip-pages"></div>
+      </footer>
+    </section>
+
+    <!-- ---- RIGHT: image properties ---- -->
+    <aside id="rightPanel" class="panel">
+      <div class="panel-head">Properties</div>
+
+      <div id="propsEmpty" class="emptyhint">
+        <div class="glyph">⌖</div>
+        <p>Select an image slot in the preview to edit its image and slot properties.</p>
+        <p class="hint">Drop files, paste with <b>Ctrl+V</b>, or use <b>Add images</b>.</p>
+      </div>
+
+      <div id="propsBody" class="panel-scroll" hidden>
+
+        <section class="group" id="grpImage">
+          <h3>Image</h3>
+          <div class="imgmeta">
+            <span id="imgName" class="name" title="File name">—</span>
+            <span id="imgDims" class="hint mono"></span>
+          </div>
+          <div class="btnrow">
+            <button type="button" id="btnReplace" class="btn grow">Replace</button>
+            <button type="button" id="btnDuplicateImg" class="btn grow">Duplicate</button>
+            <button type="button" id="btnRemoveImg" class="btn grow danger">Remove</button>
+          </div>
+          <div class="field">
+            <label>Fit mode</label>
+            <div class="seg" id="fitMode">
+              <button type="button" data-value="contain" class="on">Contain</button>
+              <button type="button" data-value="cover">Cover</button>
+            </div>
+          </div>
+          <div class="field two">
+            <label>Displayed size (mm)
+              <span class="inline">
+                <input type="number" id="imgW" min="1" max="5000" step="1" title="Image width">
+                <span class="x">×</span>
+                <input type="number" id="imgH" min="1" max="5000" step="1" title="Image height">
+              </span>
+            </label>
+          </div>
+          <label class="check"><input type="checkbox" id="aspectLock" checked> Maintain aspect ratio</label>
+          <div class="btnrow">
+            <button type="button" id="btnFitSlot" class="btn grow" title="Fit whole image inside the slot">Fit to slot</button>
+            <button type="button" id="btnFillSlot" class="btn grow" title="Fill the whole slot, cropping edges">Fill slot</button>
+          </div>
+          <div class="field">
+            <label for="imgScaleNum">Scale</label>
+            <span class="inline"><input type="number" id="imgScaleNum" min="5" max="1000" step="1" value="100"> %</span>
+          </div>
+          <div class="field">
+            <label for="imgZoom">Zoom</label>
+            <span class="inline"><input type="range" id="imgZoom" min="5" max="400" step="1" value="100"><span class="hint" id="imgZoomVal">100%</span></span>
+          </div>
+          <div class="field">
+            <label>Position</label>
+            <div class="posrow"><span class="ax">H</span><input type="range" id="posX" min="0" max="100" step="1" value="50"><span class="val mono" id="posXVal">50</span></div>
+            <div class="posrow"><span class="ax">V</span><input type="range" id="posY" min="0" max="100" step="1" value="50"><span class="val mono" id="posYVal">50</span></div>
+          </div>
+          <div class="btnrow">
+            <button type="button" id="btnRotL" class="btn grow" title="Rotate 90° counter-clockwise">⟲ 90°</button>
+            <button type="button" id="btnRotR" class="btn grow" title="Rotate 90° clockwise">⟳ 90°</button>
+            <button type="button" id="btnRot180" class="btn grow" title="Rotate 180°">180°</button>
+          </div>
+          <div class="btnrow">
+            <button type="button" id="btnCrop" class="btn grow" title="Crop the image without modifying the original">Crop…</button>
+            <button type="button" id="btnResetImg" class="btn grow" title="Reset all image adjustments">Reset</button>
+          </div>
+          <div id="cropBox" class="cropbox" hidden>
+            <div class="field two">
+              <label>X %<input type="number" id="cropX" min="0" max="99" step="1" value="0"></label>
+              <label>Y %<input type="number" id="cropY" min="0" max="99" step="1" value="0"></label>
+            </div>
+            <div class="field two">
+              <label>Width %<input type="number" id="cropW" min="1" max="100" step="1" value="100"></label>
+              <label>Height %<input type="number" id="cropH" min="1" max="100" step="1" value="100"></label>
+            </div>
+            <div class="btnrow">
+              <button type="button" id="btnCropReset" class="btn grow">Reset crop</button>
+              <button type="button" id="btnCropDone" class="btn grow primary">Done</button>
+            </div>
+            <p class="note">Drag the handles in the preview, or enter exact percentages.</p>
+          </div>
+        </section>
+
+        <section class="group" id="grpCaption">
+          <h3>Caption <span class="hint">for this image</span></h3>
+          <div class="field">
+            <label for="capText">Text</label>
+            <textarea id="capText" rows="3" maxlength="2000" placeholder="Type a caption… (empty = none)" spellcheck="true"></textarea>
+          </div>
+          <div class="field two">
+            <label>Font
+              <span class="inline">
+                <select id="capFamily" title="Font family">
+                  <option value="helvetica">Sans (Helvetica)</option>
+                  <option value="times">Serif (Times)</option>
+                  <option value="courier">Mono (Courier)</option>
+                </select>
+              </span>
+            </label>
+            <label>Size (pt)
+              <span class="inline">
+                <input type="number" id="capSize" min="4" max="96" step="0.5" title="Caption font size in points">
+              </span>
+            </label>
+          </div>
+          <div class="field">
+            <label>Style</label>
+            <div class="seg" id="capStyle">
+              <button type="button" data-style="bold" title="Bold" class="cap-b">B</button>
+              <button type="button" data-style="italic" title="Italic" class="cap-i">I</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="capColor">Colour</label>
+            <span class="colorwrap">
+              <input type="color" id="capColor" value="#000000">
+              <input type="text" id="capColorHex" class="narrow mono" value="#000000" maxlength="7" spellcheck="false">
+            </span>
+          </div>
+          <div class="field">
+            <label>Alignment</label>
+            <div class="seg" id="capAlign">
+              <button type="button" data-value="left" title="Align left">⇤</button>
+              <button type="button" data-value="center" class="on" title="Centre">↔</button>
+              <button type="button" data-value="right" title="Align right">⇥</button>
+            </div>
+          </div>
+          <p class="note">The caption sits below the image inside its slot. It appears in the preview, print and PDF exactly as shown.</p>
+        </section>
+
+        <section class="group" id="grpSlot">
+          <h3>Slot</h3>
+          <label class="check"><input type="checkbox" id="slotCustom"> Custom slot size</label>
+          <div class="field two">
+            <label>Size (mm)
+              <span class="inline">
+                <input type="number" id="slotW" min="1" max="2000" step="1">
+                <span class="x">×</span>
+                <input type="number" id="slotH" min="1" max="2000" step="1">
+              </span>
+            </label>
+          </div>
+          <div class="field">
+            <label for="slotBorder">Border thickness (mm)</label>
+            <input type="number" id="slotBorder" min="0" max="20" step="0.1">
+          </div>
+          <div class="field">
+            <label for="slotBorderColor">Border colour</label>
+            <span class="colorwrap">
+              <input type="color" id="slotBorderColor" value="#000000">
+              <input type="text" id="slotBorderColorHex" class="narrow mono" value="#000000" maxlength="7" spellcheck="false">
+            </span>
+          </div>
+          <div class="field">
+            <label for="slotRadius">Border radius (mm)</label>
+            <input type="number" id="slotRadius" min="0" max="50" step="0.5">
+          </div>
+          <div class="field">
+            <label for="slotBg">Background colour</label>
+            <span class="colorwrap">
+              <input type="color" id="slotBg" value="#ffffff">
+              <input type="text" id="slotBgHex" class="narrow mono" value="#ffffff" maxlength="7" spellcheck="false">
+              <button type="button" id="slotBgClear" class="btn icon sm" title="No background (transparent)">∅</button>
+            </span>
+          </div>
+          <div class="field">
+            <label for="slotPadding">Slot padding (mm)</label>
+            <input type="number" id="slotPadding" min="0" max="50" step="0.5">
+          </div>
+        </section>
+
+        <section class="group" id="grpMove">
+          <h3>Move</h3>
+          <div class="field">
+            <label for="movePage">Move this image to page</label>
+            <span class="inline">
+              <select id="movePage"></select>
+              <button type="button" id="btnMovePage" class="btn">Move</button>
+            </span>
+          </div>
+        </section>
+
+      </div>
+    </aside>
+  </main>
+
+  <!-- ============ STATUS BAR ============ -->
+  <footer id="statusBar">
+    <span id="statusLeft">Ready</span>
+    <span id="statusMid"></span>
+    <span id="statusRight" class="mono"></span>
+  </footer>
+</div>
+
+<!-- hidden inputs -->
+<input type="file" id="fileInput" accept="image/*,.svg" multiple hidden>
+<input type="file" id="replaceInput" accept="image/*,.svg" hidden>
+<input type="file" id="projectInput" accept="application/json,.json" hidden>
+
+<!-- print root (built on demand) -->
+<div id="printRoot" aria-hidden="true"></div>
+
+<!-- confirm dialog -->
+<div id="modal" class="modal" hidden>
+  <div class="modal-card">
+    <h4 id="modalTitle">Are you sure?</h4>
+    <p id="modalText"></p>
+    <div class="modal-actions">
+      <button type="button" id="modalCancel" class="btn">Cancel</button>
+      <button type="button" id="modalOk" class="btn danger">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" hidden></div>
+
+<script src="vendor/jspdf.umd.min.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/sizes.js"></script>
+<script src="js/state.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/render.js"></script>
+<script src="js/leftpanel.js"></script>
+<script src="js/pages.js"></script>
+<script src="js/props.js"></script>
+<script src="js/media.js"></script>
+<script src="js/pdf.js"></script>
+<script src="js/shortcuts.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
